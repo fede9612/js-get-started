@@ -5,9 +5,21 @@ function saludar(quien){
   return `Hola ${quien}, ¿cómo estás hoy?`
 }
 
+function cargarEntidadesEnMap(homeProducto, homeCliente){
+  var myMap = new Map();
+  myMap.set("producto", homeProducto);
+  myMap.set("cliente", homeCliente);
+  myMap.set("productos", homeProducto);
+  myMap.set("clientes", homeCliente);
+  return myMap;
+}
+
+
 function init(homeProducto, homeCliente) {
   var server = express();
+  var entidades = cargarEntidadesEnMap(homeProducto, homeCliente);
   server.use(bodyParser.json());
+  
 
   server.get("/saludar", (req, res) => {
     res.send(saludar("mundo"));
@@ -17,48 +29,38 @@ function init(homeProducto, homeCliente) {
     res.send(saludar(req.params.nombre));
   })
 
-  server.get("/productos", (req, res) => {
-    res.send(homeProducto.all());
+  server.get("/", (req, res) => {
+    res.send(404).send();
   })
 
-  server.get("/productos/:id", (req, res) => {
-    res.send(homeProducto.get(req.params.id));
+  server.get("/:entidad", (req, res) => {
+    //corregir el has
+    condicion = !entidades.has(req.params.entidad)
+    if(condicion){
+      res.send("<h1>Error 404<h1/>")
+    }else{
+      entidad = entidades.get(req.params.entidad)
+      res.send(entidad.all());
+    }
   })
 
-  server.post("/producto", (req, res) => {
-    homeProducto.insert(req.body);
-    res.send(201).send();
-  })
-  server.post("/cliente", (req, res) =>{
-    homeCliente.insert(req.body);
-    res.send(201).send();
-  })
-
-  server.put("/producto", (req, res) => {
-    homeProducto.update(req.body);
-    res.send(201).send();
-  })
-
-  server.delete("/producto/:id", (req, res) => {
-    homeProducto.delete(req.params.id);
+  server.post("/:entidad", (req, res) => {  
+    entidad = entidades.get(req.params.entidad)
+    entidad.insert(req.body);
     res.send(201).send();
   })
 
-  server.get("/clientes", (req, res) => {
-    res.send(homeCliente.all());
+  server.put("/:entidad", (req, res) => {
+    entidad = entidades.get(req.params.entidad)
+    entidad.update(req.body);
+    res.send(201).send();
   })
 
-
-  server.delete("/cliente/:id", (req, res) =>{
-    homeCliente.delete(req.params.id)
-    res.send(201)
+  server.delete("/:entidad/:id", (req, res) => {
+    entidad = entidades.get(req.params.entidad)
+    entidad.delete(req.params.id);
+    res.send(201).send();
   })
-
-  server.put("/cliente", (req, res) => {
-    homeCliente.update(req.body)
-    res.send(201)
-  })
-
 
   server.listen(8888, () => {
     console.log("Server running on port 8888");
