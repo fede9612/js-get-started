@@ -1,5 +1,18 @@
 express = require("express");
 bodyParser = require("body-parser");
+var events = require("events");
+
+var eventEmitter = new events.EventEmitter();
+
+
+function register(home) {
+  console.log(`registering handlers for ${home.type}`)
+  eventEmitter.on(`find-${home.type}`, (response)=>response.json(home.all()))
+  eventEmitter.on(`get-${home.type}`, (response,id)=> response.json(home.get(id)))
+  eventEmitter.on(`update-${home.type}`, (object)=> home.update(object))
+  eventEmitter.on(`insert-${home.type}`, (object)=> home.insert(object))
+  eventEmitter.on(`delete-${home.type}`, (id)=> home.delete(id))
+}
 
 function saludar(quien){
   return `Hola ${quien}, ¿cómo estás hoy?`
@@ -17,7 +30,7 @@ function cargarEntidadesEnMap(homeProducto, homeCliente){
 
 function init(homeProducto, homeCliente) {
   var server = express();
-  var entidades = cargarEntidadesEnMap(homeProducto, homeCliente);
+  cargarEntidadesEnMap(homeProducto, homeCliente)
   server.use(bodyParser.json());
   
 
@@ -33,33 +46,35 @@ function init(homeProducto, homeCliente) {
     res.send(404).send();
   })
 
+  server.get("/:entidad/:id", (req, res) => {
+    eventEmitter.emit(`get-${req.params.entidad}`, res, req.params.id);
+    res.end()
+  })
+
   server.get("/:entidad", (req, res) => {
     //corregir el has
-    condicion = !entidades.has(req.params.entidad)
-    if(condicion){
-      res.send("<h1>Error 404<h1/>")
-    }else{
-      entidad = entidades.get(req.params.entidad)
-      res.send(entidad.all());
-    }
+    // condicion = !entidades.has(req.params.entidad)
+    // if(condicion){
+    //   res.send("<h1>Error 404<h1/>")
+    // }else{
+      eventEmitter.emit(`find-${req.params.entidad}`, res);
+      res.end()
+   
   })
 
   server.post("/:entidad", (req, res) => {  
-    entidad = entidades.get(req.params.entidad)
-    entidad.insert(req.body);
+    eventEmitter.emit(`insert-${req.params.entidad}`, req.body);
     res.send(201).send();
   })
 
   server.put("/:entidad", (req, res) => {
-    entidad = entidades.get(req.params.entidad)
-    entidad.update(req.body);
-    res.send(201).send();
+    eventEmitter.emit(`update-${req.params.type}`, req.body);
+    res.status(204).end();
   })
 
   server.delete("/:entidad/:id", (req, res) => {
-    entidad = entidades.get(req.params.entidad)
-    entidad.delete(req.params.id);
-    res.send(201).send();
+    eventEmitter.emit(`delete-${req.params.type}`, req.params.id);
+    res.status(204).end();  
   })
 
   server.listen(8888, () => {
@@ -68,3 +83,4 @@ function init(homeProducto, homeCliente) {
 }
 
 exports.init = init;
+exports.register = register;
