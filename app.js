@@ -10,16 +10,12 @@ Home = require("./src/mongo/mongoHome")
 mongoConnection.connect( (db) => {
     productoHome = new Home("productos", db)
     clienteHome = new Home("clientes", db)   
-    var miProducto = new Producto("Papas Fritas", 30)
-    productoHome.insert(miProducto) 
+    // var miProducto = new Producto("Papas Fritas", 30)
+    // productoHome.insert(miProducto) 
     server.register(productoHome)
     server.register(clienteHome)
     server.init();
 })
-
-// var myHome = new HomeProducto()
-// var miProducto = new Producto("Papas Fritas", 30)
-// myHome.insert(miProducto)
 
 // var myHomeCliente = new HomeCliente()
 // var daniel = new Cliente("Daniel Rodriguez", "Guido Lucotti 3453")

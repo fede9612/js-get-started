@@ -7,8 +7,29 @@ var eventEmitter = new events.EventEmitter();
 
 function register(home) {
   console.log(`registering handlers for ${home.type}`)
-  eventEmitter.on(`find-${home.type}`, (response)=>response.json(home.all()))
-  eventEmitter.on(`get-${home.type}`, (response,id)=> response.json(home.get(id)))
+  
+  eventEmitter.on(`find-${home.type}`, 
+              (response)=>
+                home.all( 
+                  ( result) => {
+                    response.json(result)
+                    response.end()
+                  }
+              )    
+  )
+
+  eventEmitter.on(`get-${home.type}`, 
+              (id, response)=> {
+              console.log("respondiendo evento, llamando a la home")
+                home.get(id, 
+                  ( result ) => {
+                    response.json(result)
+                    response.end()
+                  }
+              )}
+  )    
+
+   
   eventEmitter.on(`update-${home.type}`, (object)=> home.update(object))
   eventEmitter.on(`insert-${home.type}`, (object)=> home.insert(object))
   eventEmitter.on(`delete-${home.type}`, (id)=> home.delete(id))
@@ -58,7 +79,6 @@ function init(homeProducto, homeCliente) {
     //   res.send("<h1>Error 404<h1/>")
     // }else{
       eventEmitter.emit(`find-${req.params.entidad}`, res);
-      res.end()
    
   })
 
