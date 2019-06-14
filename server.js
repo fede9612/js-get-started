@@ -69,7 +69,6 @@ function init(homeProducto, homeCliente) {
 
   server.get("/:entidad/:id", (req, res) => {
     eventEmitter.emit(`get-${req.params.entidad}`, res, req.params.id);
-    res.end()
   })
 
   server.get("/:entidad", (req, res) => {
@@ -84,17 +83,17 @@ function init(homeProducto, homeCliente) {
 
   server.post("/:entidad", (req, res) => {  
     eventEmitter.emit(`insert-${req.params.entidad}`, req.body);
-    res.send(201).send();
+    res.status(204).end(); 
   })
 
   server.put("/:entidad", (req, res) => {
-    eventEmitter.emit(`update-${req.params.type}`, req.body);
-    res.status(204).end();
+    eventEmitter.emit(`update-${req.params.entidad}`, req.body);
+    res.status(204).end(); 
   })
 
   server.delete("/:entidad/:id", (req, res) => {
-    eventEmitter.emit(`delete-${req.params.type}`, req.params.id);
-    res.status(204).end();  
+    eventEmitter.emit(`delete-${req.params.entidad}`, req.params.id);
+    res.status(204).end(); 
   })
 
   server.listen(8888, () => {
