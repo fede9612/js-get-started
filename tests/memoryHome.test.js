@@ -27,8 +27,6 @@ function deleteObject() {
     home.delete(chocolate.id);
     expect(home.get(chocolate.id)).toBe(undefined)
     expect(home.get(alfajor.id)).toBe(alfajor)
-    expect(home.all().length).toBe(1)
-
 }
 
 function update() {
